@@ -5,7 +5,7 @@
  * @date 2026-01-14
  */
 
-import { loginUser } from "@/application/services/authService"; // 导入模拟服务
+import { loginUser, storeToken } from "@/application/services/authService"; // 导入模拟服务
 import { Button } from "@/presentation/components/atoms/ui/button";
 import {
   Card,
@@ -16,6 +16,7 @@ import {
   CardTitle,
 } from "@/presentation/components/atoms/ui/card";
 import { Input } from "@/presentation/components/atoms/ui/input";
+import { hashPassword } from "@shared/lib/utils"; // 导入密码哈希函数
 import { Eye, EyeOff } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom"; // 用于路由跳转和链接
@@ -44,16 +45,19 @@ export const LoginPage: React.FC = () => {
     setError(null); // 清空之前的错误
 
     try {
-      console.log("Attempting login with:", { username, password });
+      console.log("Attempting login with username:", username);
 
-      // 调用模拟的 API 服务
-      const response = await loginUser(username, password);
-      const token = response.token; // 解构获取 token
+      // 对密码进行哈希处理
+      const hashedPassword = await hashPassword(password);
+      console.log("Password hashed successfully");
 
-      console.log("Login successful, received token:", token);
+      // 调用模拟的 API 服务，传入哈希后的密码
+      const response = await loginUser(username, hashedPassword);
 
-      // 成功后，存储 Token
-      localStorage.setItem("authToken", token);
+      console.log("Login successful, received tokens:", response);
+
+      // 成功后，使用storeToken函数存储完整的 Token 信息
+      storeToken(response);
 
       // 跳转到主页
       navigate("/");

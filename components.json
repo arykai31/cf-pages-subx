@@ -16,8 +16,9 @@
     "utils": "@shared/lib/utils",
     "ui": "@/presentation/components/atoms/ui",
     "lib": "@shared/lib",
-    "hooks": "@/presentation/hooks",
-    "layouts": "@/presentation/components/layouts"
+    "hooks": "@/presentation/hooks"
   },
-  "registries": {}
+  "registries": {
+    "@lucide-animated": "https://lucide-animated.com/r/{name}.json"
+  }
 }

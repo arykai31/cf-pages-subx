@@ -5,12 +5,13 @@
  * @date 2026-01-14
  */
 
-import { createRoot } from "react-dom/client";
-import { RouterProvider } from "react-router-dom";
-
+import { errorService } from "@/application/services/errorService";
 import "@/index.css";
 import { router } from "@config/routes";
 import React from "react";
+import { createRoot } from "react-dom/client";
+import { RouterProvider } from "react-router-dom";
+import { ThemeProvider } from "./presentation/contexts/ThemeContext";
 
 class ErrorBoundary extends React.Component<
   { children: React.ReactNode },
@@ -26,7 +27,16 @@ class ErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
-    console.error("应用渲染错误:", error, errorInfo);
+    // 使用 errorService 记录错误
+    errorService.error(
+      "React 渲染错误",
+      {
+        error: error.message,
+        stack: error.stack,
+        errorInfo: errorInfo.componentStack,
+      },
+      "ErrorBoundary"
+    );
   }
 
   render(): React.ReactNode {
@@ -42,6 +52,33 @@ class ErrorBoundary extends React.Component<
   }
 }
 
+// 添加全局错误监听
+window.addEventListener("error", (event) => {
+  errorService.error(
+    "全局 JavaScript 错误",
+    {
+      message: event.message,
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+      error: event.error,
+    },
+    "GlobalError"
+  );
+});
+
+// 添加未处理的 Promise 拒绝监听
+window.addEventListener("unhandledrejection", (event) => {
+  errorService.error(
+    "未处理的 Promise 拒绝",
+    {
+      reason: event.reason,
+      promise: event.promise,
+    },
+    "UnhandledRejection"
+  );
+});
+
 const rootElement = document.getElementById("root");
 
 if (!rootElement) {
@@ -52,6 +89,8 @@ if (!rootElement) {
 
 createRoot(rootElement).render(
   <ErrorBoundary>
-    <RouterProvider router={router} />
+    <ThemeProvider>
+      <RouterProvider router={router} />
+    </ThemeProvider>
   </ErrorBoundary>
 );

@@ -5,23 +5,28 @@
  * @date 2026-01-14
  */
 
+import { getCurrentUser, logoutUser } from "@/application/services/authService";
+import { ThemeToggle } from "@/presentation/components/atoms/ThemeToggle";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/presentation/components/atoms/ui/dropdown-menu";
 import { Link } from "@/presentation/components/atoms/ui/link";
+import { LogOut, Settings, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export const Header: React.FC = () => {
   const navigate = useNavigate();
+  const currentUser = getCurrentUser() || "用户";
 
   // 退出登录处理函数
   const handleLogout = () => {
-    // 清除token
-    localStorage.removeItem("authToken");
+    // 使用 authService 清除所有 token
+    logoutUser();
     // 跳转到登录页
     navigate("/login");
   };
@@ -39,8 +44,9 @@ export const Header: React.FC = () => {
           <nav></nav>
         </div>
 
-        {/* 右侧：用户头像下拉菜单 */}
+        {/* 右侧：主题切换 + 用户头像下拉菜单 */}
         <div className="flex items-center gap-3">
+          <ThemeToggle />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="p-0 border-none bg-transparent cursor-pointer">
@@ -51,24 +57,46 @@ export const Header: React.FC = () => {
                 />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-26" align="end">
-              <DropdownMenuItem>
-                <Link to="/profile" aria-label="个人中心">
+            <DropdownMenuContent className="w-48" align="end">
+              {/* 用户信息标签 */}
+              <DropdownMenuLabel>
+                <div className="flex flex-col">
+                  <span className="font-medium">{currentUser}</span>
+                  <span className="text-xs text-muted-foreground">管理员</span>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+
+              {/* 下拉菜单项 */}
+              <DropdownMenuItem className="cursor-pointer">
+                <User className="mr-2 h-4 w-4" />
+                <Link
+                  to="/profile"
+                  aria-label="个人中心"
+                  className="flex items-center w-full"
+                >
                   个人中心
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Link to="/settings" aria-label="设置">
+              <DropdownMenuItem className="cursor-pointer">
+                <Settings className="mr-2 h-4 w-4" />
+                <Link
+                  to="/settings"
+                  aria-label="设置"
+                  className="flex items-center w-full"
+                >
                   设置
                 </Link>
               </DropdownMenuItem>
-              {/* 分隔线 */}
+
               <DropdownMenuSeparator />
+
               <DropdownMenuItem
-                className="cursor-pointer"
+                className="cursor-pointer text-red-500 hover:text-red-600 hover:bg-red-50"
                 onClick={handleLogout}
               >
-                退出
+                <LogOut className="mr-2 h-4 w-4" />
+                退出登录
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
